@@ -1,82 +1,244 @@
-### Pastebin Lite
+## Pastebin Lite
 
-Pastebin Lite is a small Pastebin-like web application that allows users to create text pastes and share a URL to view them.
-Each paste can optionally expire based on time (TTL) or number of views.
-This project is built as a take-home assignment and is evaluated primarily through automated tests against the deployed application.
+A minimal Pastebin-like web application built with Next.js (App Router) and Vercel KV (Redis).
 
-## Project Description
+Users can create text pastes and share a link to view them. Each paste can optionally expire based on time (TTL) or number of views.
 
-The application allows a user to:
+This project is designed for serverless deployment and automated evaluation.
 
-Create a paste containing arbitrary text
-Receive a shareable URL for that paste
-Visit the URL to view the paste
-Have pastes become unavailable based on optional constraints such as time expiry or view limits
+## Features
+
+Create a text paste
+
+Get a shareable URL
+
+View paste in browser
+
+Optional expiration:
+
+Time-based (TTL)
+
+View-count limit
+
+Deterministic time support for automated testing
+
+Serverless-ready persistence using Vercel KV
 
 ## Tech Stack
 
 Next.js (App Router)
+
 Node.js
+
 TypeScript
+
 Vercel KV (Redis)
+
+Vercel (Deployment)
 
 ## Persistence Layer
 
-The application uses Vercel KV (Redis) as its persistence layer.
-Reason for choosing this persistence layer:
-In-memory storage is unreliable in serverless environments
-Vercel KV persists data across requests
-It works correctly with automated tests running against a deployed Vercel application
+This project uses Vercel KV (Redis) as the persistence layer.
+
+# Why Vercel KV?
+
+Works reliably in serverless environments
+
+Data persists across requests
+
+Compatible with Vercel deployments
+
+No in-memory storage issues
+
+Each paste is stored using the key format:
+
+paste:<id>
+
+Example:
+
+paste:abc123
+
+Stored data structure:
+
+{
+"content": "Hello world",
+"remaining_views": 5,
+"expires_at": 1735689600000
+}
 
 ## Environment Variables
 
-The application relies on the following environment variables:
+The application requires the following environment variables:
 
+Required
 NEXT_PUBLIC_BASE_URL
-Used to generate the shareable paste URL.
 
-TEST_MODE
-When set to 1, the application supports deterministic time testing using the request header
-x-test-now-ms (milliseconds since epoch) for expiry logic.
+Used to generate shareable paste URLs.
 
-An example environment file is provided in .env.example.
+Example (local):
 
-## Running the Application Locally
+NEXT_PUBLIC_BASE_URL=http://localhost:3000
 
-    Install dependencies : npm install
+Optional (for deterministic testing)
+TEST_MODE=1
 
-# Create a local environment file
+When enabled, the application reads the request header:
 
-Create a file named .env.local in the project root with the following values:
+x-test-now-ms
+
+This allows expiry logic to use a deterministic timestamp (milliseconds since epoch) instead of system time.
+
+An example file is provided in:
+
+.env.example
+
+## Running the Project Locally
+
+1. Install dependencies
+   npm install
+
+2. Create environment file
+
+Create:
+
+.env.local
+
+Add:
 
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
 TEST_MODE=1
 
-# Start the development server
+3. Start development server
+   npm run dev
 
-    npm run dev
+Open:
 
-The application will be available at:
 http://localhost:3000
 
-## API Routes
+API Endpoints
+Health Check
+GET /api/healthz
 
-    GET /api/healthz
-    Health check endpoint that returns JSON and verifies access to the persistence layer.
+Returns:
 
-    POST /api/pastes
-    Creates a new paste with optional TTL and view-count constraints.
+{ "ok": true }
 
-    GET /api/pastes/:id
-    Fetches a paste via API. Each successful fetch counts as a view.
+Verifies access to the persistence layer.
 
-    GET /p/:id
-    Returns an HTML page displaying the paste content.
+Create Paste
+POST /api/pastes
 
-## Design Notes
+Request body:
 
-    All unavailable pastes return HTTP 404 responses
-    Invalid inputs return appropriate 4xx responses with JSON error bodies
-    Paste content is rendered safely without script execution
-    No global mutable state is used, making the app safe for serverless deployment
-    The application is designed to behave deterministically under automated testing conditions
+{
+"content": "Hello world",
+"ttl_seconds": 60,
+"max_views": 5
+}
+
+Fields:
+
+content (required)
+
+ttl_seconds (optional)
+
+max_views (optional)
+
+Response:
+
+{
+"id": "abc123",
+"url": "https://your-domain.com/p/abc123"
+}
+
+Fetch Paste (API)
+GET /api/pastes/:id
+
+Response:
+
+{
+"content": "Hello world",
+"remaining_views": 4,
+"expires_at": "2026-01-01T00:00:00.000Z"
+}
+
+Each successful fetch counts as one view.
+
+If expired or unavailable:
+
+404 Not Found
+
+View Paste (HTML)
+GET /p/:id
+
+Returns an HTML page displaying the paste content.
+
+If expired or unavailable:
+
+404 - Paste not found or expired
+
+Expiration Logic
+
+A paste becomes unavailable when:
+
+TTL has expired, OR
+
+View count reaches zero
+
+Whichever happens first.
+
+All unavailable pastes return:
+
+HTTP 404
+
+## Design Decisions
+
+1. No In-Memory State
+
+The application does not use global mutable state.
+This ensures safe execution in serverless environments.
+
+2. Safe Rendering
+
+Paste content is rendered safely without executing scripts.
+
+3. Deterministic Testing Support
+
+When:
+
+TEST_MODE=1
+
+And the request includes:
+
+x-test-now-ms: <timestamp>
+
+Expiry logic uses the provided timestamp instead of system time.
+This ensures predictable automated test behavior.
+
+Deployment
+
+Recommended deployment platform:
+
+Vercel
+
+## Steps:
+
+Push repository to GitHub
+
+Import project in Vercel
+
+Add environment variables:
+
+NEXT_PUBLIC_BASE_URL
+
+KV_REST_API_URL
+
+KV_REST_API_TOKEN
+
+TEST_MODE (optional)
+
+Deploy
+
+## Author
+
+Shubham Gavhane
