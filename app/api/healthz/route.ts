@@ -1,8 +1,11 @@
-import { kv } from "@vercel/kv";
+import { Redis } from "@upstash/redis";
+
+const redis = Redis.fromEnv();
 
 export async function GET(): Promise<Response> {
   try {
-    await kv.ping();
+    await redis.ping()
+;
     return Response.json({ ok: true });
   } catch {
     return new Response(

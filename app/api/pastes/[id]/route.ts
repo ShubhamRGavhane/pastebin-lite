@@ -1,4 +1,6 @@
-import { kv } from "@vercel/kv";
+import { Redis } from "@upstash/redis";
+
+const redis = Redis.fromEnv();
 import { NextRequest } from "next/server";
 
 interface Paste {
@@ -23,7 +25,7 @@ export async function GET(
 ): Promise<Response> {
   const { id } = await context.params;
 
-  const paste = (await kv.get(`paste:${id}`)) as Paste | null;
+  const paste = (await await redis.get(`paste:${id}`)) as Paste | null;
 
   if (!paste) {
     return Response.json({ error: "Not found" }, { status: 404 });
@@ -40,7 +42,7 @@ export async function GET(
   }
 
   paste.views += 1;
-  await kv.set(`paste:${id}`, paste);
+  await await redis.set(`paste:${id}`, paste);
 
   return Response.json({
     content: paste.content,

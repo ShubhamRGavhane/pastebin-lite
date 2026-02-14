@@ -1,4 +1,6 @@
-import { kv } from "@vercel/kv";
+import { Redis } from "@upstash/redis";
+
+const redis = Redis.fromEnv();
 import { nanoid } from "nanoid";
 
 interface CreatePasteBody {
@@ -34,7 +36,7 @@ export async function POST(req: Request): Promise<Response> {
     views: 0,
   };
 
-  await kv.set(`paste:${id}`, paste);
+  await await redis.set(`paste:${id}`, paste);
 
   return Response.json({
     id,
