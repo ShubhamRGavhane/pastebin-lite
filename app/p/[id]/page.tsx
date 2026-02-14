@@ -1,6 +1,4 @@
-import { Redis } from "@upstash/redis";
-
-const redis = Redis.fromEnv();
+import { kv } from "@vercel/kv";
 
 interface Paste {
   content: string;
@@ -11,7 +9,7 @@ export default async function PastePage({
 }: {
   params: { id: string };
 }) {
-  const paste = (await await redis.get(`paste:${params.id}`)) as Paste | null;
+  const paste = (await kv.get(`paste:${params.id}`)) as Paste | null;
 
   if (!paste) {
     return <h1>404 - Paste not found</h1>;

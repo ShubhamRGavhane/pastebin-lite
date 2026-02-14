@@ -1,7 +1,4 @@
-import { Redis } from "@upstash/redis";
-
-const redis = Redis.fromEnv();
-import { NextRequest } from "next/server";
+import { kv } from "@vercel/kv";
 
 interface Paste {
   content: string;
@@ -11,7 +8,7 @@ interface Paste {
   views: number;
 }
 
-function getNow(req: NextRequest): number {
+function getNow(req: Request): number {
   const testNow = req.headers.get("x-test-now-ms");
   if (process.env.TEST_MODE === "1" && testNow) {
     return Number(testNow);
@@ -20,12 +17,10 @@ function getNow(req: NextRequest): number {
 }
 
 export async function GET(
-  req: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  req: Request,
+  { params }: { params: { id: string } }
 ): Promise<Response> {
-  const { id } = await context.params;
-
-  const paste = (await await redis.get(`paste:${id}`)) as Paste | null;
+  const paste = (await kv.get(`paste:${params.id}`)) as Paste | null;
 
   if (!paste) {
     return Response.json({ error: "Not found" }, { status: 404 });
@@ -42,7 +37,7 @@ export async function GET(
   }
 
   paste.views += 1;
-  await await redis.set(`paste:${id}`, paste);
+  await kv.set(`paste:${params.id}`, paste);
 
   return Response.json({
     content: paste.content,
