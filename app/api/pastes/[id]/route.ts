@@ -1,4 +1,5 @@
 import { kv } from "@vercel/kv";
+import { NextRequest } from "next/server";
 
 interface Paste {
   content: string;
@@ -8,7 +9,7 @@ interface Paste {
   views: number;
 }
 
-function getNow(req: Request): number {
+function getNow(req: NextRequest): number {
   const testNow = req.headers.get("x-test-now-ms");
   if (process.env.TEST_MODE === "1" && testNow) {
     return Number(testNow);
@@ -17,10 +18,12 @@ function getNow(req: Request): number {
 }
 
 export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ): Promise<Response> {
-  const paste = (await kv.get(`paste:${params.id}`)) as Paste | null;
+  const { id } = await context.params;
+
+  const paste = (await kv.get(`paste:${id}`)) as Paste | null;
 
   if (!paste) {
     return Response.json({ error: "Not found" }, { status: 404 });
@@ -37,7 +40,7 @@ export async function GET(
   }
 
   paste.views += 1;
-  await kv.set(`paste:${params.id}`, paste);
+  await kv.set(`paste:${id}`, paste);
 
   return Response.json({
     content: paste.content,
