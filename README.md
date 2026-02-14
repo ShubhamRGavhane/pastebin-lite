@@ -8,7 +8,7 @@ This project is designed for serverless deployment and automated evaluation.
 
 ---
 
-## 🚀 Features
+## Features
 
 - Create a text paste
 - Get a shareable URL
@@ -21,7 +21,7 @@ This project is designed for serverless deployment and automated evaluation.
 
 ---
 
-## 🛠 Tech Stack
+## Tech Stack
 
 - Next.js (App Router)
 - Node.js
@@ -31,7 +31,7 @@ This project is designed for serverless deployment and automated evaluation.
 
 ---
 
-## 🗄 Persistence Layer
+## Persistence Layer
 
 This project uses **Vercel KV (Redis)** as the persistence layer.
 
@@ -66,7 +66,7 @@ paste:abc123
 
 ---
 
-## 🔐 Environment Variables
+## Environment Variables
 
 The application requires the following environment variables:
 
@@ -100,7 +100,7 @@ An example file is provided in:
 
 ---
 
-## ▶️ Running the Project Locally
+## Running the Project Locally
 
 ### 1️⃣ Install dependencies
 
@@ -137,9 +137,9 @@ http://localhost:3000
 
 ---
 
-## 📡 API Endpoints
+## API Endpoints
 
-### 🩺 Health Check
+### Health Check
 
 ```
 GET /api/healthz
@@ -155,7 +155,7 @@ Verifies access to the persistence layer.
 
 ---
 
-### ✍️ Create Paste
+### Create Paste
 
 ```
 POST /api/pastes
@@ -188,7 +188,7 @@ Fields:
 
 ---
 
-### 📥 Fetch Paste (API)
+### Fetch Paste (API)
 
 ```
 GET /api/pastes/:id
@@ -214,7 +214,7 @@ If expired or unavailable:
 
 ---
 
-### 🌐 View Paste (HTML)
+### View Paste (HTML)
 
 ```
 GET /p/:id
@@ -230,7 +230,7 @@ If expired or unavailable:
 
 ---
 
-## ⏳ Expiration Logic
+## Expiration Logic
 
 A paste becomes unavailable when:
 
@@ -247,7 +247,7 @@ HTTP 404
 
 ---
 
-## 🧠 Design Decisions
+## Design Decisions
 
 ### 1️⃣ No In-Memory State
 
@@ -281,7 +281,7 @@ This ensures predictable automated test behavior.
 
 ---
 
-## 🚀 Deployment
+## Deployment
 
 Recommended deployment platform:
 
@@ -300,7 +300,7 @@ Recommended deployment platform:
 
 ---
 
-## 👨‍💻 Author
+## Author
 
 **Shubham Gavhane**
 
