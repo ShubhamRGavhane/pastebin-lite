@@ -4,10 +4,10 @@ const redis = Redis.fromEnv();
 
 export async function GET(): Promise<Response> {
   try {
-    await redis.ping()
-;
+    await redis.ping();
     return Response.json({ ok: true });
-  } catch {
+  } catch (err) {
+    console.error(err);
     return new Response(
       JSON.stringify({ ok: false }),
       { status: 500 }
